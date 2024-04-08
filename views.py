@@ -6,7 +6,8 @@ views = Blueprint(__name__,"views")
 
 @views.route("/")
 def home():
-    return render_template("home.html", products=products)
+    headings = ['Dish', 'Price', ' ']
+    return render_template("home.html", products=products, headings=headings)
 
 
 @views.route("/cart")

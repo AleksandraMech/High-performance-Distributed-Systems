@@ -11,9 +11,14 @@
         <h1>Products</h1>
 
         <table bgcolor="black" width="500">
+            <tr bgcolor="grey" align="center" >
+                {% for header in headings %}
+                <th>{{ header}}</th>
+                {% endfor %}
+            </tr>
             {% for product in products %}
             <tr bgcolor="lightgrey" align="center">
-                     <td>{{product.name}}</td><td>{{product.price }}</td><td><input type="submit" value="add to the cart"> </td>
+                     <td>{{product.name}}</td><td>{{product.price }}</td><td><input type="submit" value="order"> </td>
             </tr>
             {% endfor %}
     
