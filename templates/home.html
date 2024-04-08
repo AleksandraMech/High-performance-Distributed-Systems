@@ -9,14 +9,16 @@
 <body>
     <div>   
         <h1>Products</h1>
-        <ul>
+
+        <table bgcolor="black" width="500">
             {% for product in products %}
-            <li>
-                <h3>{{ product.name }}</h3>
-                <p>{{ product.price }}</p>
-            </li>
+            <tr bgcolor="lightgrey" align="center">
+                     <td>{{product.name}}</td><td>{{product.price }}</td><td><input type="submit" value="add to the cart"> </td>
+            </tr>
             {% endfor %}
-        </ul>
+    
+        </table>
+       
     </div>
    
 </body>
