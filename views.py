@@ -1,7 +1,11 @@
 from flask import Blueprint, render_template
 
-views = Blueprint(__name__, "views")
+from main import products
+
+views = Blueprint(__name__,"views")
 
 @views.route("/")
 def home():
-    return render_template("index.html")
+    return render_template("index.html", products=products)
+
+
