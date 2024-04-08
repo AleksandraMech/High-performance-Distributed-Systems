@@ -19,6 +19,8 @@ prices = html.css("span.sc-de642809-3.hwSkqq")
 
 products = []
 
+headings = ("food", "price")
+
 for name, price in zip(names, prices):
     product_name = name.text()
     product_price = price.text()
