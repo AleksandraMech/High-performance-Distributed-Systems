@@ -1,7 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-
-
+{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
+    %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +7,7 @@
 </head>
 
 <body>
-    <div>
+    <div>   
         <h1>Products</h1>
         <ul>
             {% for product in products %}
@@ -20,22 +18,7 @@
             {% endfor %}
         </ul>
     </div>
-    <script type="text/javascript" src="{{ url_for('static', filename='index.js')}}"></script>
+   
 </body>
 
-
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-</head>
-
-<body>
-    <div>
-        <h1> Home page </h1>
-    </div>
-</body>
-
-
-</html>
+{% endblock %}
