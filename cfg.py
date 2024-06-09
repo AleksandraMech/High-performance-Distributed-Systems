@@ -1,0 +1,5 @@
+database="hpds"
+postgres_user = "postgres"
+postgres_password = "albertina"
+host="localhost"
+port="5433"

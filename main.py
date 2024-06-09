@@ -1,29 +1,71 @@
-import httpx 
-import json
-from selectolax.parser import HTMLParser
+import csv
+import psycopg2
+import cfg as cfg
+import os
+from datetime import datetime
 
-class Product:
-    def __init__(self, name, price):
-        self.name = name
-        self.price = price
+def read_csv_and_save_to_database(file_path):
+    try:
+        # Create a connection to the PostgreSQL database
+        conn = psycopg2.connect(
+            database=cfg.database,
+            user=cfg.postgres_user,
+            password=cfg.postgres_password,
+            host=cfg.host,
+            port=cfg.port
+        )
 
-url = "https://wolt.com/pl/pol/gdansk/restaurant/lees-chinese"
+        if conn is not None:
+            cur = conn.cursor()
 
-headers = {"User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 OPR/108.0.0.0"}
+            # Open the CSV file
+            with open(file_path, newline='', encoding='utf-8') as csvfile:
+                csvreader = csv.reader(csvfile)
+                next(csvreader)  # Skip the header row
 
-resp = httpx.get(url, headers=headers)
-html = HTMLParser(resp.text)
+                # Iterate through each row in the CSV file
+                for row in csvreader:
+                    # Extract data from the CSV row
+                    restaurant_name, category, dish, price = row
 
-names = html.css("div h3")
-prices = html.css("span.sc-de642809-3.hwSkqq")
+                       # Print the data
+#print("Restaurant Name:", restaurant_name)
+                 #   print("Category:", category)
+#print("Dish:", dish)
+                 #   print("Price:", price)
+#print("-----------------------------")
 
-products = []
+                    # Remove ' zł' from price and convert to float
+                   # price = float(price.replace(' zł', '').replace(',', '.'))
 
-headings = ("food", "price")
+                    # Get current datetime
+                   # now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-for name, price in zip(names, prices):
-    product_name = name.text()
-    product_price = price.text()
-    product = Product(product_name, product_price)
-    products.append(product)
+                    # Insert data into the database
+                   # zm = "INSERT INTO restaurants_menu(restaurant_name, category, dish, price) VALUES ( \'"+str(restaurant_name)+"\',  \'"+str(category)+"\',  \'"+str(dish)+"\',  \'"+str(price)+"\')"
+                 #   zm = "INSERT INTO restaurants_menu(restaurant_name, category, dish, price) VALUES (%s, %s, %s, %s, %s)"
+                 #   cur.execute(zm, (restaurant_name, category, dish, price))
+#cur.execute(zm, (restaurant_name, category, dish, price, now))
 
+
+            print("Data saved to the PostgreSQL database")
+
+            # Commit and close the connection
+            conn.commit()
+            cur.close()
+            conn.close()
+        else:
+            print("Failed to connect to the database")
+    except Exception as e:
+        print("Error: An unexpected error occurred while saving data to the database.")
+        print(e)
+
+def main():
+    # Use absolute path for the CSV file
+    file_path = os.path.join(os.path.dirname(__file__), 'restaurants_menu.csv')
+
+    read_csv_and_save_to_database(file_path)
+    
+
+if __name__ == '__main__':
+    main()

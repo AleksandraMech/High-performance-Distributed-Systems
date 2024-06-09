@@ -1,16 +1,32 @@
-{% extends "base.html" %} {% block title %}Home{% endblock %} {% block content
-    %}
+{% extends "base.html" %}
+
+{% block title %}Cart{% endblock %}
+
+{% block content %}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
 </head>
 
 <body>
-    <div>   
-        <h1>Products in cart</h1>
-        
-    </div>
-   
-</body>
+    <div>
+        <h1>Shopping Cart</h1>
 
+        <table bgcolor="black" width="500">
+            <tr bgcolor="grey" align="center">
+                <th>Dish</th>
+                <th>Price</th>
+            </tr>
+            {% for item in cart %}
+            <tr bgcolor="lightgrey" align="center">
+                <td>{{ item.dish }}</td>
+                <td>{{ item.price }} zł</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Total: {{ total }} zł</h2>
+    </div>
+</body>
 {% endblock %}
