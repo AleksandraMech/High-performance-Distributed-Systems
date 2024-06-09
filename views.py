@@ -1,6 +1,9 @@
 from flask import Blueprint, render_template, request, session, redirect, url_for, flash
 import csv
 import os
+import cfg as cfg
+import psycopg2
+
 
 views = Blueprint(__name__, "views")
 
@@ -23,6 +26,17 @@ def read_csv_and_save_to_database(file_path):
                 "dish": dish,
                 "price": price
             })
+
+            
+         #   conn = psycopg2.connect( database=cfg.database, user=cfg.postgres_user,password=cfg.postgres_password, host=cfg.host, port=cfg.port)
+          #  if conn is not None:
+           #     cur = conn.cursor()
+            #    zm = "INSERT INTO restaurants_menu(restaurant_name, category, dish, price) VALUES ( \'"+str(restaurant_name)+"\',  \'"+str(category)+"\',  \'"+str(dish)+"\',  \'"+str(price)+"\')"
+             #   cur.execute(zm, (restaurant_name, category, dish, price))
+              #  conn.commit()
+               # cur.close()
+                #conn.close()
+            
     return data
 
 def get_unique_values(data, key):
