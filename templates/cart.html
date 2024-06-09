@@ -17,11 +17,18 @@
             <tr bgcolor="grey" align="center">
                 <th>Dish</th>
                 <th>Price</th>
+                <th>Action</th>
             </tr>
             {% for item in cart %}
             <tr bgcolor="lightgrey" align="center">
                 <td>{{ item.dish }}</td>
                 <td>{{ item.price }} zł</td>
+                <td>
+                    <form action="{{ url_for('views.remove_from_cart') }}" method="POST">
+                        <input type="hidden" name="dish" value="{{ item.dish }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </td>
             </tr>
             {% endfor %}
         </table>

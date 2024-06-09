@@ -32,6 +32,15 @@ def get_unique_values(data, key):
 file_path = os.path.join(os.path.dirname(__file__), 'restaurants_menu.csv')
 data = read_csv_and_save_to_database(file_path)
 
+@views.route("/remove_from_cart", methods=["POST"])
+def remove_from_cart():
+    dish_to_remove = request.form.get("dish")
+    if "cart" in session:
+        session["cart"] = [item for item in session["cart"] if item["dish"] != dish_to_remove]
+        flash(f"Product '{dish_to_remove}' has been removed from the cart.")
+    return redirect(url_for("views.cart"))
+
+
 @views.route("/", methods=["GET", "POST"])
 def home():
     filtered_data = data
