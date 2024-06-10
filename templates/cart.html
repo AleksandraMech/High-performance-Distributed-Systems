@@ -1,11 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cart</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <title>Document</title>
 </head>
+
 <body>
     <h1>Your Cart</h1>
     <table>
@@ -40,4 +44,5 @@
 
     <p><a href="{{ url_for('views.home') }}">Continue Shopping</a></p>
 </body>
-</html>
+{% endblock %}
+
