@@ -113,12 +113,12 @@ def send_order():
         return redirect(url_for("views.cart"))
 
     # Przykładowy URL zewnętrznego serwisu (httpbin.org dla celów testowych)
-    external_service_url = "https://httpbin.org/post" 
+    external_service_url = "https://httpbin.org/post"
 
     # Przygotowanie danych do wysłania
     order_data = {
         "order": cart,
-        "total": sum(float(item["price"]) for item in cart)
+        "total": round(sum(float(item["price"]) for item in cart), 2)
     }
 
     try:
