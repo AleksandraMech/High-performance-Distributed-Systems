@@ -1,39 +1,43 @@
-{% extends "base.html" %}
-
-{% block title %}Cart{% endblock %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
-
 <body>
-    <div>
-        <h1>Shopping Cart</h1>
-
-        <table bgcolor="black" width="500">
-            <tr bgcolor="grey" align="center">
+    <h1>Your Cart</h1>
+    <table>
+        <thead>
+            <tr>
                 <th>Dish</th>
                 <th>Price</th>
                 <th>Action</th>
             </tr>
+        </thead>
+        <tbody>
             {% for item in cart %}
-            <tr bgcolor="lightgrey" align="center">
-                <td>{{ item.dish }}</td>
-                <td>{{ item.price }} zł</td>
-                <td>
-                    <form action="{{ url_for('views.remove_from_cart') }}" method="POST">
-                        <input type="hidden" name="dish" value="{{ item.dish }}">
-                        <button type="submit">Remove</button>
-                    </form>
-                </td>
-            </tr>
+                <tr>
+                    <td>{{ item.dish }}</td>
+                    <td>{{ item.price }}</td>
+                    <td>
+                        <form action="{{ url_for('views.remove_from_cart') }}" method="post" style="display:inline;">
+                            <input type="hidden" name="dish" value="{{ item.dish }}">
+                            <button type="submit">Remove</button>
+                        </form>
+                    </td>
+                </tr>
             {% endfor %}
-        </table>
+        </tbody>
+    </table>
+    <h2>Total: {{ total }}</h2>
+    
+    <!-- Przycisk wysyłający listę zamówień -->
+    <form action="{{ url_for('views.send_order') }}" method="post">
+        <button type="submit">Send Order</button>
+    </form>
 
-        <h2>Total: {{ total }} zł</h2>
-    </div>
+    <p><a href="{{ url_for('views.home') }}">Continue Shopping</a></p>
 </body>
-{% endblock %}
+</html>

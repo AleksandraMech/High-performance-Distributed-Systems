@@ -3,6 +3,7 @@ import csv
 import os
 import cfg as cfg
 import psycopg2
+import requests
 
 
 views = Blueprint(__name__, "views")
@@ -72,6 +73,16 @@ def home():
                 session["cart"] = []
             
             session["cart"].append({"dish": dish, "price": price})
+           # conn = psycopg2.connect( database=cfg.database, user=cfg.postgres_user,password=cfg.postgres_password, host=cfg.host, port=cfg.port)
+          #  if conn is not None:
+             #   cur = conn.cursor()
+           #     varying_array = dish.split(',')
+            #    zm = "INSERT INTO order(dish, price) VALUES (%s)"
+             #   cur.execute(zm, (varying_array))
+              #  conn.commit()
+               # cur.close()
+                #conn.close()
+
             flash(f"Product '{dish}' has been added to the cart.")
             return redirect(url_for("views.home"))
         
@@ -85,16 +96,43 @@ def home():
     restaurant_names = get_unique_values(data, "restaurant_name")
     categories = get_unique_values(data, "category")
     
-    return render_template(
-        "home.html", 
-        data=filtered_data, 
-        headings=headings, 
-        restaurant_names=restaurant_names, 
-        categories=categories
-    )
+    return render_template( "home.html", data=filtered_data, headings=headings, restaurant_names=restaurant_names, categories=categories)
 
 @views.route("/cart")
 def cart():
     cart = session.get("cart", [])
     total = sum(float(item["price"]) for item in cart)
     return render_template("cart.html", cart=cart, total=total)
+
+@views.route("/send_order", methods=["POST"])
+def send_order():
+    cart = session.get("cart", [])
+    
+    if not cart:
+        flash("Your cart is empty. Cannot send order.")
+        return redirect(url_for("views.cart"))
+
+    # Przykładowy URL zewnętrznego serwisu (httpbin.org dla celów testowych)
+    external_service_url = "https://httpbin.org/post" 
+
+    # Przygotowanie danych do wysłania
+    order_data = {
+        "order": cart,
+        "total": sum(float(item["price"]) for item in cart)
+    }
+
+    try:
+        # Wysłanie danych do zewnętrznego serwisu
+        response = requests.post(external_service_url, json=order_data)
+
+        # Sprawdzenie odpowiedzi z serwisu
+        if response.status_code == 200:
+            flash("Order has been successfully sent.")
+            session["cart"] = []  # Wyczyszczenie koszyka po wysłaniu zamówienia
+        else:
+            flash(f"Failed to send order. Error: {response.status_code}")
+    except requests.RequestException as e:
+        flash(f"An error occurred while sending the order: {e}")
+
+    return redirect(url_for("views.cart"))
+
