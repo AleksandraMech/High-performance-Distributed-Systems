@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Received Orders</title>
+</head>
+<body>
+    <h1>Received Orders</h1>
+    <form method="POST" action="{{ url_for('views.received_orders') }}">
+        <button type="submit" name="action" value="receive_orders">Receive All Orders</button>
+    </form>
+
+    {% if received_orders %}
+        <ul>
+            {% for order in received_orders %}
+                <li>
+                    <strong>Order:</strong>
+                    <ul>
+                        {% for item in order['order'] %}
+                            <li>{{ item['dish'] }} - {{ item['price'] }} zł</li>
+                        {% endfor %}
+                    </ul>
+                    <strong>Total:</strong> {{ order['total'] }} zł
+                    <form method="POST" action="{{ url_for('views.received_orders') }}">
+                        <input type="hidden" name="order_index" value="{{ loop.index0 }}">
+                        <button type="submit" name="action" value="remove_order">Przyjęto zamówienie</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No received orders yet.</p>
+    {% endif %}
+
+    <a href="{{ url_for('views.home') }}">Back to Home</a>
+</body>
+
+
+
+{% endblock %}
