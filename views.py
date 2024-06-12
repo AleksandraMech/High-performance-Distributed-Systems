@@ -12,21 +12,59 @@ views = Blueprint(__name__, "views")
 
 def read_csv_and_save_to_database(file_path):
     data = []
-    with open(file_path, newline='', encoding='utf-8') as csvfile:
-        csvreader = csv.reader(csvfile)
-        next(csvreader)  # Skip the header row
+    try:
+        conn = psycopg2.connect(
+            database=cfg.database,
+            user=cfg.postgres_user,
+            password=cfg.postgres_password,
+            host=cfg.host,
+            port=cfg.port
+        )
+        cur = conn.cursor()
 
-        for row in csvreader:
-            restaurant_name, category, dish, price = row
-            price = price.replace('zł', '').replace('\xa0', '').replace(',', '.')
-            data.append({
-                "restaurant_name": restaurant_name,
-                "category": category,
-                "dish": dish,
-                "price": price
-            })
+        with open(file_path, newline='', encoding='utf-8') as csvfile:
+            csvreader = csv.reader(csvfile)
+            next(csvreader)  # Skip the header row
+
+            for row in csvreader:
+                restaurant_name, category, dish, price = row
+                price = price.replace('zł', '').replace('\xa0', '').replace(',', '.')
+                
+                # Check if price is valid
+                try:
+                    price_value = float(price)
+                except ValueError:
+                    price_value = None
+
+                data.append({
+                    "restaurant_name": restaurant_name,
+                    "category": category,
+                    "dish": dish,
+                    "price": price if price_value is not None else "NULL"
+                })
+
+                # Insert data into the restaurant_data table
+                if price_value is not None:
+                    insert_query = """
+                    INSERT INTO restaurant_data (restaurant_name, category, dish, price) 
+                    VALUES (%s, %s, %s, %s)
+                    """
+                    cur.execute(insert_query, (restaurant_name, category, dish, price))
+                else:
+                    insert_query = """
+                    INSERT INTO restaurant_data (restaurant_name, category, dish, price) 
+                    VALUES (%s, %s, %s, NULL)
+                    """
+                    cur.execute(insert_query, (restaurant_name, category, dish))
+
+        conn.commit()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        print(f"Failed to save CSV data to the database: {e}")
 
     return data
+
 
 def get_unique_values(data, key):
     return sorted(set(item[key] for item in data))
@@ -120,26 +158,42 @@ def send_order():
 
 @views.route("/received_orders", methods=["GET", "POST"])
 def received_orders():
-    received_orders = session.get("received_orders", [])
+    try:
+        conn = psycopg2.connect(
+            database=cfg.database,
+            user=cfg.postgres_user,
+            password=cfg.postgres_password,
+            host=cfg.host,
+            port=cfg.port
+        )
+        cur = conn.cursor()
 
-    if request.method == "POST":
-        if request.form.get("action") == "receive_orders":
-            new_orders = receive_all_orders_from_rabbitmq()
-            if new_orders:
-                received_orders.extend(new_orders)
-                session["received_orders"] = received_orders
-                for order in new_orders:
-                    save_order_to_database(order)  # Save each order to the database
-                flash("All orders received from RabbitMQ.")
-            else:
-                flash("No new orders in RabbitMQ.")
-        elif request.form.get("action") == "remove_order":
-            order_index = int(request.form.get("order_index"))
-            if 0 <= order_index < len(received_orders):
-                received_orders.pop(order_index)
-                session["received_orders"] = received_orders
+        if request.method == "POST":
+            if request.form.get("action") == "receive_orders":
+                new_orders = receive_all_orders_from_rabbitmq()
+                if new_orders:
+                    for order in new_orders:
+                        save_order_to_database(order)
+                    flash("All orders received from RabbitMQ.")
+                else:
+                    flash("No new orders in RabbitMQ.")
+            elif request.form.get("action") == "remove_order":
+                order_id = int(request.form.get("order_id"))
+                update_query = "UPDATE received_orders SET accepted = TRUE WHERE id = %s"
+                cur.execute(update_query, (order_id,))
+                conn.commit()
                 flash("Order has been accepted and removed from the list.")
-            else:
-                flash("Invalid order index.")
+
+        # Fetch non-accepted orders from the database
+        select_query = "SELECT id, order_data FROM received_orders WHERE accepted = FALSE"
+        cur.execute(select_query)
+        received_orders = cur.fetchall()
+
+        cur.close()
+        conn.close()
+
+    except Exception as e:
+        print(f"Failed to fetch received orders from the database: {e}")
+        received_orders = []
 
     return render_template("received_orders.html", received_orders=received_orders)

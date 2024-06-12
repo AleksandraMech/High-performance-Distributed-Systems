@@ -8,6 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Received Orders</title>
 </head>
+<!DOCTYPE html>
+<html lang="en">
 <body>
     <h1>Received Orders</h1>
     <form method="POST" action="{{ url_for('views.received_orders') }}">
@@ -16,18 +18,18 @@
 
     {% if received_orders %}
         <ul>
-            {% for order in received_orders %}
+            {% for order_id, order_data in received_orders %}
                 <li>
                     <strong>Order:</strong>
                     <ul>
-                        {% for item in order['order'] %}
+                        {% for item in order_data['order'] %}
                             <li>{{ item['dish'] }} - {{ item['price'] }} zł</li>
                         {% endfor %}
                     </ul>
-                    <strong>Total:</strong> {{ order['total'] }} zł
+                    <strong>Total:</strong> {{ order_data['total'] }} zł
                     <form method="POST" action="{{ url_for('views.received_orders') }}">
-                        <input type="hidden" name="order_index" value="{{ loop.index0 }}">
-                        <button type="submit" name="action" value="remove_order">Przyjęto zamówienie</button>
+                        <input type="hidden" name="order_id" value="{{ order_id }}">
+                        <button type="submit" name="action" value="remove_order">Order completed </button>
                     </form>
                 </li>
             {% endfor %}
@@ -38,7 +40,4 @@
 
     <a href="{{ url_for('views.home') }}">Back to Home</a>
 </body>
-
-
-
 {% endblock %}
